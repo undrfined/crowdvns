@@ -1,0 +1,368 @@
+.valid {
+    color: green !important;
+    font-weight: 700 !important;
+}
+
+.crowd-logo {
+    color: grey;
+}
+.crowd-text {
+    display: block;
+}
+
+.formulation {
+    padding-bottom: 120px !important;
+    --formulation-bg: #fafafa;
+    background: var(--formulation-bg) !important;
+    transition: 0.25s ease-in-out background-color;
+}
+
+.dHash {
+    font-size: 0.8em;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    text-align: right;
+}
+
+
+.answer > div {
+    /*border: 1px solid #999;*/
+    position: relative;
+    --progress: 0%;
+    --color: rgba(85, 85, 85, 0.2);
+}
+
+.answer > div::after {
+    display: block;
+    content: "";
+    width: var(--progress);
+    height: 100%;
+    background-color: var(--color);
+    top: 0;
+    left: 0;
+    position: absolute;
+    pointer-events: none;
+    transition: 0.25s ease-in-out background-color, 0.25s ease-in-out width;
+}
+
+
+.que {
+    clear: left;
+    text-align: left;
+    margin: 0 auto 1.8em auto
+}
+
+.que .info {
+    float: left;
+    width: 7em;
+    padding: .5em;
+    margin-bottom: 1.8em;
+    background-color: #dee2e6;
+    border: 1px solid #cad0d7
+}
+
+.que h3.no {
+    margin: 0;
+    font-size: .8em;
+    line-height: 1
+}
+
+.que span.qno {
+    font-size: 1.5em;
+    font-weight: 700
+}
+
+.que .info>div {
+    font-size: .8em;
+    margin-top: .7em
+}
+
+.que .info .questionflag.editable {
+    cursor: pointer
+}
+
+.que .info .editquestion img,.que .info .questionflag img,.que .info .questionflag input {
+    vertical-align: bottom
+}
+
+.que .content {
+    margin: 0 0 0 8.5em
+}
+
+.que.multichoice .answer div.r0 .icon.fa-check,.que.multichoice .answer div.r1 .icon.fa-check,.que.multichoice .answer div.r0 .icon.fa-remove,.que.multichoice .answer div.r1 .icon.fa-remove {
+    text-indent: 0
+}
+
+.formulation input[type="text"],.formulation select {
+    width: auto;
+    vertical-align: baseline
+}
+
+.que.multianswer .formulation .yui3-widget-positioned {
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box
+}
+
+.que.multianswer .formulation .yui3-widget-positioned .feedbackspan {
+    width: inherit;
+    max-width: inherit
+}
+
+.path-mod-quiz input[size] {
+    width: auto;
+    max-width: 100%
+}
+
+.que .ablock {
+    margin: .7em 0 .3em 0
+}
+
+.que .im-controls {
+    margin-top: .5em;
+    text-align: left
+}
+
+.que .specificfeedback,.que .generalfeedback,.que .numpartscorrect .que .rightanswer,.que .im-feedback,.que .feedback,.que p {
+    margin: 0 0 .5em
+}
+
+.que .correctness.correct {
+    background-color: #5cb85c
+}
+
+.que .correctness.partiallycorrect {
+    background-color: #ff7518
+}
+
+.que .correctness.notanswered,.que .correctness.incorrect {
+    background-color: #d9534f
+}
+
+.que .qtext {
+    margin-bottom: 1.5em
+}
+
+.que .grading,.que .comment,.que .commentlink,.que .history {
+    margin-top: .5em
+}
+
+.que .history h3 {
+    margin: 0 0 .2em;
+    font-size: 1em
+}
+
+.que .history table {
+    width: 100%;
+    margin: 0
+}
+
+.que .history .current {
+    font-weight: 700
+}
+
+.que .questioncorrectnessicon {
+    vertical-align: text-bottom
+}
+
+.que input.questionflagimage {
+    padding-right: 3px
+}
+
+.importerror {
+    margin-top: 10px;
+    border-bottom: 1px solid #555
+}
+
+.mform .que.comment .fitemtitle {
+    width: 20%
+}
+
+#page-question-preview #techinfo {
+    margin: 1em 0
+}
+
+#page-mod-quiz-edit ul.slots .activityinstance>a {
+    display: inline;
+    text-indent: 0;
+    padding-left: 0
+}
+
+#page-mod-quiz-edit ul.slots .activityinstance img.activityicon {
+    margin-left: 0
+}
+
+#page-mod-quiz-edit .box.generalbox.questionbank {
+    padding: .5em
+}
+
+#page-mod-quiz-edit .questionbank .categorypagingbarcontainer,#page-mod-quiz-edit .questionbank .categoryquestionscontainer,#page-mod-quiz-edit .questionbank .choosecategory {
+    padding: 0
+}
+
+#page-mod-quiz-edit .questionbank .choosecategory select {
+    width: 100%
+}
+
+#page-mod-quiz-edit div.questionbank .categoryquestionscontainer {
+    background: transparent
+}
+
+#page-mod-quiz-edit #categoryquestions>thead {
+    background: #fff
+}
+
+#page-mod-quiz-edit #categoryquestions>tbody>tr:nth-of-type(even) {
+    background: #e4e4e4
+}
+
+#page-mod-quiz-edit .questionbankwindow div.header {
+    color: #444;
+    text-shadow: none;
+    margin: 0 -10px 0 -10px;
+    padding: 2px 10px 2px 10px;
+    background: transparent
+}
+
+#page-mod-quiz-edit .questionbankwindow div.header a:link,#page-mod-quiz-edit .questionbankwindow div.header a:visited {
+    color: #1177d1
+}
+
+#page-mod-quiz-edit .questionbankwindow div.header a:hover {
+    color: #0b4f8a
+}
+
+#page-mod-quiz-edit .createnewquestion {
+    padding: .3em 0
+}
+
+#page-mod-quiz-edit .createnewquestion div,#page-mod-quiz-edit .createnewquestion input {
+    margin: 0
+}
+
+#page-mod-quiz-edit .questionbankwindow div.header .title {
+    color: #373a3c
+}
+
+#page-mod-quiz-edit div.container div.generalbox {
+    background-color: transparent;
+    padding: 1.5em
+}
+
+#page-mod-quiz-edit .categoryinfo {
+    background-color: transparent;
+    border-bottom: none
+}
+
+#page-mod-quiz-edit .createnewquestion .singlebutton input {
+    margin-bottom: 0
+}
+
+#page-mod-quiz-edit div.questionbank .categorysortopotionscontainer,#page-mod-quiz-edit div.questionbank .categoryselectallcontainer {
+    padding: 0 0 1.5em 0
+}
+
+#page-mod-quiz-edit div.questionbank .categorypagingbarcontainer {
+    background-color: transparent;
+    margin: 0;
+    border-top: 0;
+    border-bottom: 0
+}
+
+#page-mod-quiz-edit div.questionbank .categorypagingbarcontainer .paging {
+    padding: 0 .3em
+}
+
+#page-mod-quiz-edit div.question div.content div.questioncontrols {
+    background-color: #fff
+}
+
+#page-mod-quiz-edit div.question div.content div.points {
+    margin-top: -.5em;
+    padding-bottom: 0;
+    border: none;
+    background-color: #fff;
+    position: static;
+    width: 12.1em;
+    float: right;
+    margin-right: 60px
+}
+
+#page-mod-quiz-edit div.question div.content div.points br {
+    display: none
+}
+
+#page-mod-quiz-edit div.question div.content div.points label {
+    display: inline-block
+}
+
+#page-mod-quiz-edit div.quizpage .pagecontent .pagestatus {
+    background-color: #fff
+}
+
+#page-mod-quiz-edit .quizpagedelete,#page-mod-quiz-edit .quizpagedelete img {
+    background-color: transparent
+}
+
+#page-mod-quiz-edit div.quizpage .pagecontent {
+    border: 1px solid #ddd;
+    overflow: hidden
+}
+
+#page-mod-quiz-edit div.questionbank .categoryinfo {
+    padding: .3em 0
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer {
+    padding: 0
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer strong {
+    display: block
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer hr,#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer br {
+    display: none
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer strong {
+    margin-left: -.3em
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer strong label {
+    margin-left: .3em
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer input {
+    margin-left: 0
+}
+
+#page-mod-quiz-edit div.questionbank .modulespecificbuttonscontainer input + input {
+    margin-left: 5px
+}
+
+.questionbankwindow .module {
+    width: auto
+}
+
+.questionbankwindow .form-autocomplete-selection {
+    margin-left: 0
+}
+
+#page-mod-quiz-edit div.editq div.question div.content {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    overflow: hidden
+}
+
+#page-mod-quiz-edit ul.slots .activityinstance img.activityicon {
+    margin-top: 0;
+    width: 16px;
+    height: 16px;
+    padding-right: 4px
+}
+
+.path-mod-quiz .statedetails {
+    display: block;
+    font-size: .9em
+}

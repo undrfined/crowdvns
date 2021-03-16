@@ -1,0 +1,27 @@
+{
+  "name": "crowdvns",
+  "version": "0.6",
+  "description": "Crowdsource the vns!",
+  "manifest_version": 2,
+  "permissions": ["https://*.firebaseio.com/"],
+
+  "content_scripts": [
+    {
+      "css": ["styles.css"],
+      "js": ["sha256.js", "loader.js", "firebase.js"],
+      "matches": [
+        "https://school.moodledemo.net/*",
+        "https://vns.lpnu.ua/*",
+        "http://vns.lpnu.ua/*"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "images/preview.png",
+    "32": "images/preview.png",
+    "48": "images/preview.png",
+    "128": "images/preview.png"
+  },
+  "web_accessible_resources": ["images/preview.png"],
+  "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'; connect-src 'self' wss://*.firebaseio.com;"
+}
