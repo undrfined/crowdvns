@@ -1,6 +1,6 @@
 {
   "name": "crowdvns",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Crowdsource the vns!",
   "manifest_version": 2,
   "permissions": ["https://crowdvns-default-rtdb.firebaseio.com/*", "https://*.firebaseio.com/*", "*://raw.githubusercontent.com/*"],
