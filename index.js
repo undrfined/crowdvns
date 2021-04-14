@@ -35,14 +35,16 @@
         messagingSenderId: "587277721428",
         appId: "1:587277721428:web:a963f92c3c1fd8c378b2c1"
     };
+    if (localStorage) { // fix for API
+        localStorage.removeItem("firebase:previous_websocket_failure");
+    }
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const storage = firebase.storage();
 
     const $usertext = document.querySelector(".usertext")
-
     const isView = /\/quiz\/view/.test(window.location.pathname)
-    if(isView) {
+    if (isView) {
         const cmid = new URLSearchParams(window.location.search).get('id')
 
         const $quizinfo = document.querySelector(".quizinfo")
@@ -134,14 +136,14 @@
         const updateStatus = () => {
             let id = "id: " + qHash.substr(0, 4) + "..." + qHash.substr(qHash.length - 4, 4)
             let votersNames = Array.from(voters).map(voter => users[voter] || "Unknown").join(", ")
-            let loadedTime = "loaded in " + Math.floor((endTime - startTime)/100)/10 + "s!"
+            let loadedTime = "loaded in " + Math.floor((endTime - startTime) / 100) / 10 + "s!"
             let loading = loaded ? loadedTime + "\n" + voters.length + " voters: " + votersNames : "loading"
             $status.innerText = `${loading} | ${id}`
         }
 
         updateAllStatus.push(updateStatus)
 
-        if(DEBUG) {
+        if (DEBUG) {
             $formulation.appendChild($status)
             updateStatus()
         }
@@ -164,7 +166,7 @@
         }
 
         const $attachments = $formulation.querySelector(".attachments")
-        if($attachments) {
+        if ($attachments) {
             $formulation.appendChild($files)
 
             const observer = new MutationObserver(function (mutations) {
@@ -211,11 +213,11 @@
                 const text = $copy.innerText
                 const hash = await hashCode(text)
                 const $input = l.parentNode.querySelector("input:not([type='hidden'])")
-                if(verified) {
+                if (verified) {
                     verifiedRef.child(hash).set(true)
                 }
 
-                if($input) {
+                if ($input) {
                     $input.addEventListener("change", updateAll)
 
 
@@ -225,15 +227,15 @@
                         $input,
                         ref: answersRef.child(hash),
                         verified: (verified) => {
-                            if(verified) {
-                                if(!l.querySelector("valid_" + hash)) {
+                            if (verified) {
+                                if (!l.querySelector("valid_" + hash)) {
                                     const $icon = validIcon()
                                     $icon.id = "valid_" + hash
                                     l.appendChild($icon)
                                 }
                             } else {
                                 const $prev = l.querySelector("valid_" + hash)
-                                if($prev) {
+                                if ($prev) {
                                     $prev.parentNode.removeChild($prev)
                                 }
                             }
@@ -267,7 +269,7 @@
                 ref.child(uid).set($select.options[$select.selectedIndex].dataset.text)
             })
             console.log($select)
-            if($select.parentNode.querySelector(".fa-check")) {
+            if ($select.parentNode.querySelector(".fa-check")) {
                 verifiedRef.child(hash).set($select.options[$select.selectedIndex].dataset.text)
             }
 
@@ -285,11 +287,11 @@
                         const total = Object.keys(answers).length
                         Object.keys(answers).forEach(key => {
                             const value = answers[key]
-                            if(value === text) {
+                            if (value === text) {
                                 ss++
                             }
                         })
-                        const percentage = Math.floor((ss/total) * 100)
+                        const percentage = Math.floor((ss / total) * 100)
                         q.innerText = q.dataset.text + ` | ${isNaN(percentage) ? 0 : percentage}%`
                     })
 
@@ -302,13 +304,13 @@
         answers = [...answers, ...textboxes
             .map(($input, i) => {
                 let $container = $formulation
-                if(textboxes.length > 1) {
+                if (textboxes.length > 1) {
                     $container = cr("details")
                     $container.appendChild(cr("summary", "q" + i))
                     $formulation.appendChild($container)
                 }
 
-                if($input.parentNode.querySelector(".fa-check")) {
+                if ($input.parentNode.querySelector(".fa-check")) {
                     verifiedRef.child(i).set($input.innerHTML || $input.value)
                 }
 
@@ -337,13 +339,13 @@
                         $container.appendChild($answers)
                     },
                     update: (voted, total, isValid, answers) => {
-                        if(answers) {
+                        if (answers) {
                             Object.keys(answers).forEach((user) => {
                                 const username = users[user]
                                 const html = answers[user]
                                 let $answers = document.querySelector("#" + "zz_" + qHash + "_" + i + "_" + user + " .editor_atto_content_wrap")
                                 if (!$answers) {
-                                    if(html) {
+                                    if (html) {
                                         $answers = cr("details")
                                         $answers.open = true
                                         $answers.id = "zz_" + qHash + "_" + i + "_" + user
@@ -354,7 +356,7 @@
                                         $container.appendChild($answers)
                                     }
                                 } else {
-                                    if(!html) {
+                                    if (!html) {
                                         $answers.parentNode.parentNode.removeChild($answers.parentNode)
                                     } else {
                                         $answers.innerHTML = html
@@ -374,7 +376,7 @@
 
         const processFiles = (snapshot) => {
             const value = snapshot.val()
-            if(value) {
+            if (value) {
                 Object.keys(value).forEach(user => {
                     const fileRefs = value[user]
                     fileRefs.forEach((fileRef, i) => {
@@ -397,11 +399,11 @@
 
         const processVerified = (snapshot) => {
             const value = snapshot.val()
-            if(!value) return
+            if (!value) return
 
             answers.forEach(({hash, verified}) => {
                 const k = value[hash]
-                if(!k) {
+                if (!k) {
                     return
                 }
                 // console.log("VERIFIED", hash, k)
@@ -416,18 +418,18 @@
 
             loaded = true
             const allVoted = new Set()
-            if(value) {
+            if (value) {
                 Object.values(value).forEach((k) => Object.keys(k).forEach(l => allVoted.add(l)))
             }
             voters = Array.from(allVoted)
-            if(!endTime) {
+            if (!endTime) {
                 endTime = performance.now()
             }
 
             updateStatus()
 
 
-            if(!value) {
+            if (!value) {
                 $total.innerText = "Nobody has answered this question yet."
                 answers.forEach(({update}) => {
                     update(0, 0, false)
@@ -443,7 +445,7 @@
 
             answers.forEach(({hash, update}) => {
                 const k = value[hash]
-                if(!k) {
+                if (!k) {
                     update(0, 1, false, {})
                     // TODO
                     // $crowd.innerText = `Unknown answer?`
@@ -457,6 +459,7 @@
         }
 
         answersRef.on("value", process)
+
         filesRef.on("value", processFiles)
         verifiedRef.on("value", processVerified)
     })

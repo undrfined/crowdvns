@@ -1,14 +1,14 @@
 {
   "name": "crowdvns",
-  "version": "0.6",
+  "version": "1.1",
   "description": "Crowdsource the vns!",
   "manifest_version": 2,
-  "permissions": ["https://*.firebaseio.com/"],
+  "permissions": ["https://crowdvns-default-rtdb.firebaseio.com/*", "https://*.firebaseio.com/*", "*://raw.githubusercontent.com/*"],
 
   "content_scripts": [
     {
       "css": ["styles.css"],
-      "js": ["sha256.js", "loader.js", "firebase.js"],
+      "js": ["sha256.js", "firebase.js", "loader.js"],
       "matches": [
         "https://school.moodledemo.net/*",
         "https://vns.lpnu.ua/*",
