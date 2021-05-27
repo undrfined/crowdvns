@@ -1,8 +1,9 @@
 (() => {
     'use strict';
 
-    const VERSION = "1.1.1";
-    console.log("oki")
+    // CHANGELOG
+    // 27 May 2020 / 1.2.0 / Added migrations for exams
+    const VERSION = "1.2.0";
     const addLogos = () => {
 
     }
@@ -18,6 +19,21 @@
         const $icon = cr("i", "", "icon")
         $icon.classList.add("fa", "fa-check", "text-success", "fa-fw")
         return $icon
+    }
+
+    const getQuizLinks = () => {
+        return Array.from(document.querySelectorAll("img[src*=\"theme/image.php/boost/quiz/\"]")).map(l => {
+            const name = l.parentNode.querySelector(".instancename")
+            if(name.querySelector(".accesshide")) {
+                name.removeChild(name.querySelector(".accesshide"))
+            }
+
+            return {
+                id: l.parentNode.href.match(/id=(.+)/)[1],
+                name: name.innerText,
+                $elem: l.parentNode
+            };
+        })
     }
 
     const hashCode = async s => {
@@ -42,7 +58,50 @@
     const database = firebase.database();
     const storage = firebase.storage();
 
+    const uid = document.querySelector(".logininfo a").href.match(/id=(.+)/)[1]
+
     const $usertext = document.querySelector(".usertext")
+    const IS_ADMIN = uid === "106603"
+
+    const isCourse = /\/course\/view\.php/.test(window.location.pathname)
+    if(isCourse && IS_ADMIN) {
+        const links = getQuizLinks()
+        links.forEach(({$elem, name, id}) => {
+            const $select = cr("select")
+            links.forEach(l => {
+                const $option = cr("option", l.name)
+                $option.value = l.id
+                $select.appendChild($option)
+            })
+
+            const $mergeBtn = cr("button", "Merge")
+            $elem.parentNode.appendChild($select)
+            $elem.parentNode.appendChild($mergeBtn)
+            $mergeBtn.onclick = () => {
+                const mergeTo = $select.value
+                if(confirm(`Merge ${name} questions to ${links.find(l => l.id === mergeTo).name}?`)) {
+                    const refFrom = database.ref("questions_v2").child(id)
+                    const refTo = database.ref("questions_v2").child(mergeTo)
+
+                    refFrom.get().then((snapshot) => {
+                        const value = snapshot.val()
+
+                        console.log(mergeTo)
+                        refTo.get().then((snapshot) => {
+                            const existing = snapshot.val()
+                            refTo.set({...value, ...existing}).then(l => {
+                                refTo.get().then((snapshot) => {
+                                    alert("Merge successfull, there are now " + Object.keys(snapshot.val()).length + " questions")
+                                })
+                            })
+                        })
+                    })
+                }
+            }
+            // $elem.parentNode.appendChild()
+        })
+        return;
+    }
     const isView = /\/quiz\/view/.test(window.location.pathname)
     if (isView) {
         const cmid = new URLSearchParams(window.location.search).get('id')
@@ -60,7 +119,6 @@
 
     const cmid = new URLSearchParams(window.location.search).get('cmid')
     const username = $usertext.innerText
-    const uid = document.querySelector(".logininfo a").href.match(/id=(.+)/)[1]
 
     const usersRef = database.ref("users")
     usersRef.child(uid).set(username)
@@ -78,29 +136,6 @@
     document.querySelector(".site-name").appendChild($crowdLogo)
     const $logo = document.querySelector(".logo img")
     $logo && ($logo.src = chrome.runtime.getURL("images/preview.png"))
-
-// database.ref("version").on("value", (snapshot) => {
-//     const val = snapshot.val()
-//     if(val) {
-//         const split = val.split(".")
-//         const currentSplit = VERSION.split(".")
-//         let newVersion = false
-//         let localNewVersion = false
-//         split.forEach((k, i) => {
-//             if (k > currentSplit[i]) {
-//                 newVersion = true
-//             } else if(currentSplit[i] > k) {
-//                 localNewVersion = true
-//             }
-//         })
-//         if(localNewVersion) {
-//             database.ref("version").set(VERSION)
-//         }
-//         if (newVersion) {
-//             $crowdLogo.innerHTML = ` <a href="https://t.me/crowdvns" target="_blank">New version available!</a>`
-//         }
-//     }
-// })
 
     const submit = () => document.querySelector(".submitbtns input").click()
     const $ques = Array.from(document.querySelectorAll(".que"))
@@ -126,7 +161,12 @@
 
         const $files = cr("details", "<summary>Files</summary>")
 
-        const question = $que.querySelector(".qtext").innerText
+        const replacedImages = $que.querySelector(".qtext").cloneNode(true)
+        Array.from(replacedImages.querySelectorAll("img")).map(l => {
+            const [, first, second] = l.src.match(/pluginfile\.php\/(.+?)\/.+\/(.+)/)
+            l.parentNode.replaceChild(cr("div", `image (${first}/${second})`), l)
+        })
+        const question = replacedImages.innerText
         const qHash = await hashCode(question)
         const qRef = ref.child(qHash)
         const dataRef = qRef.child("data")
