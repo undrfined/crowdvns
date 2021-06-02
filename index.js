@@ -2,8 +2,9 @@
     'use strict';
 
     // CHANGELOG
-    // 27 May 2020 / 1.2.0 / Added migrations for exams
-    const VERSION = "1.2.0";
+    // 27 May 2021 / 1.2.0 / Added migrations for exams
+    // 2 Jun 2021 / 1.3.0 / Hmm...
+    const VERSION = "1.3.0";
     const addLogos = () => {
 
     }
@@ -36,9 +37,9 @@
         })
     }
 
-    const hashCode = async s => {
+    const hashCode = async (s, v3_hash = true) => {
         const hash = sha256.create();
-        hash.update(s);
+        hash.update(v3_hash ? s.replace(/(\r\n|\n|\r|\s)/gm, "") : s);
         return hash.hex();
     }
 
@@ -57,6 +58,34 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const storage = firebase.storage();
+
+
+    // const refOld = database.ref("questions_v2")
+    // const refNew = database.ref("questions_v3")
+    // refNew.set({})
+    // refOld.get().then((snapshot) => {
+    //     const val = snapshot.val()
+    //     Object.keys(val).forEach(cmid => {
+    //         const ques = val[cmid]
+    //         Object.keys(ques).forEach(async qHash => {
+    //             const q = ques[qHash]
+    //             const newHash = await hashCode(q.data.question)
+    //             if(qHash !== newHash && q.data.question.includes("Ethernet")) {
+    //                 console.log('change', {cmid, q: q.data.question.replace(/(\r\n|\n|\r|\s)/gm, ""), qHash, newHash})
+    //             }
+    //             q.data.question = q.data.question.replace(/(\r\n|\n|\r|\s)/gm, "");
+    //             val[cmid][newHash] = q;
+    //             delete val[cmid][qHash]
+    //             // console.log(q.data.question)
+    //         })
+    //     })
+    //     setTimeout(() => {
+    //         refNew.set(val);
+    //         console.log(val)
+    //     }, 10000)
+    // })
+    //
+    // return
 
     const uid = document.querySelector(".logininfo a").href.match(/id=(.+)/)[1]
 
@@ -80,8 +109,8 @@
             $mergeBtn.onclick = () => {
                 const mergeTo = $select.value
                 if(confirm(`Merge ${name} questions to ${links.find(l => l.id === mergeTo).name}?`)) {
-                    const refFrom = database.ref("questions_v2").child(id)
-                    const refTo = database.ref("questions_v2").child(mergeTo)
+                    const refFrom = database.ref("questions_v3").child(id)
+                    const refTo = database.ref("questions_v3").child(mergeTo)
 
                     refFrom.get().then((snapshot) => {
                         const value = snapshot.val()
@@ -108,7 +137,7 @@
 
         const $quizinfo = document.querySelector(".quizinfo")
         $quizinfo.appendChild(cr("p", "Test"))
-        const ref = database.ref("questions_v2").child(cmid)
+        const ref = database.ref("questions_v3").child(cmid)
 
         ref.on("value", (snapshot) => {
             $quizinfo.innerText = "Total questions answered: " + Object.values(snapshot.val()).reduce((acc, el) => el.answers ? acc + 1 : acc, 0)
@@ -139,12 +168,13 @@
 
     const submit = () => document.querySelector(".submitbtns input").click()
     const $ques = Array.from(document.querySelectorAll(".que"))
-    const ref = database.ref("questions_v2").child(cmid)
+    const ref = database.ref("questions_v3").child(cmid)
 
     const $total = cr("p", "Total questions answered: loading...")
     const $navblock = document.querySelector("#mod_quiz_navblock .card-body")
     $navblock.appendChild($total)
     ref.on("value", (snapshot) => {
+        console.log(Object.values(snapshot.val()).filter(l => l.answers).map(l => l.data.question))
         $total.innerText = "Total questions answered: " + Object.values(snapshot.val()).reduce((acc, el) => el.answers ? acc + 1 : acc, 0)
     })
 
@@ -166,8 +196,9 @@
             const [, first, second] = l.src.match(/pluginfile\.php\/(.+?)\/.+\/(.+)/)
             l.parentNode.replaceChild(cr("div", `image (${first}/${second})`), l)
         })
-        const question = replacedImages.innerText
+        const question = replacedImages.innerText.replace(/(\r\n|\n|\r)/gm,"")
         const qHash = await hashCode(question)
+        console.log({question, qHash})
         const qRef = ref.child(qHash)
         const dataRef = qRef.child("data")
 
@@ -242,7 +273,7 @@
             });
         }
 
-        let answers = (await Promise.all(Array.from($que.querySelectorAll(".answer label"))
+        let answers = (await Promise.all(Array.from($que.querySelectorAll(".answer div[data-region=\"answer-label\"]"))
             .map(async l => {
                 const verified = !!l.parentNode.querySelector(".fa-check")
                 const $copy = l.cloneNode(true)
@@ -251,7 +282,7 @@
                 $answernumber && $answernumber.parentNode.removeChild($answernumber)
 
                 const text = $copy.innerText
-                const hash = await hashCode(text)
+                const hash = await hashCode(text, false)
                 const $input = l.parentNode.querySelector("input:not([type='hidden'])")
                 if (verified) {
                     verifiedRef.child(hash).set(true)
