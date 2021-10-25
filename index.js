@@ -90,7 +90,7 @@
     const uid = document.querySelector(".logininfo a").href.match(/id=(.+)/)[1]
 
     const $usertext = document.querySelector(".usertext")
-    const IS_ADMIN = uid === "106603"
+    const IS_ADMIN = uid === "166181"
 
     const isCourse = /\/course\/view\.php/.test(window.location.pathname)
     if(isCourse && IS_ADMIN) {
