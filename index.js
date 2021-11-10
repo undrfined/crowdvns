@@ -529,6 +529,7 @@
 
     document.onkeypress = (e) => {
         if(e.key === 'h' && e.shiftKey && e.ctrlKey) {
+            e.preventDefault()
             if(localStorage.getItem('hidden') === "true") {
                 localStorage.removeItem('hidden')
                 location.reload()
