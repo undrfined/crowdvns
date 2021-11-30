@@ -8,7 +8,7 @@
     let prevLogo = document.querySelector(".logo img").src
     const addLogos = () => {
         const manifest = chrome.runtime.getManifest()
-        const $crowdLogo = cr("sub", ` ${manifest.name} v${VERSION} [press alt+z to hide]`, "crowd-logo")
+        const $crowdLogo = cr("sub", ` ${manifest.name} v${VERSION}`, "crowd-logo")
         document.querySelector(".site-name").appendChild($crowdLogo)
         const $logo = document.querySelector(".logo img")
         $logo && ($logo.src = chrome.runtime.getURL("images/preview.png"))
@@ -550,7 +550,6 @@
             localStorage.removeItem('hidden')
             location.reload()
         } else {
-            alert('alt+z to show again');
             localStorage.setItem('hidden', 'true')
             Array.from(document.querySelectorAll("*[data-crowdvns]")).forEach(l => {
                 l.style = "display: none;";
