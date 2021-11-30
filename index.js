@@ -4,7 +4,7 @@
     // CHANGELOG
     // 27 May 2021 / 1.2.0 / Added migrations for exams
     // 2 Jun 2021 / 1.3.0 / Hmm...
-    const VERSION = "1.4.3";
+    const VERSION = "1.4.4";
     let prevLogo = document.querySelector(".logo img").src
     const addLogos = () => {
         const manifest = chrome.runtime.getManifest()
@@ -84,7 +84,7 @@
         const IS_ADMIN = uid === "166181"
 
         const isCourse = /\/course\/view\.php/.test(window.location.pathname)
-        if(isCourse && IS_ADMIN) {
+        if (isCourse && IS_ADMIN) {
             const links = getQuizLinks()
             links.forEach(({$elem, name, id}) => {
                 const $select = cr("select")
@@ -99,7 +99,7 @@
                 $elem.parentNode.appendChild($mergeBtn)
                 $mergeBtn.onclick = () => {
                     const mergeTo = $select.value
-                    if(confirm(`Merge ${name} questions to ${links.find(l => l.id === mergeTo).name}?`)) {
+                    if (confirm(`Merge ${name} questions to ${links.find(l => l.id === mergeTo).name}?`)) {
                         const refFrom = database.ref("questions_v3").child(id)
                         const refTo = database.ref("questions_v3").child(mergeTo)
 
@@ -139,412 +139,426 @@
         }
 
         const cmid = new URLSearchParams(window.location.search).get('cmid')
-        const username = $usertext.innerText
 
-        const usersRef = database.ref("users")
-        usersRef.child(uid).set(username)
-        let users = null
-        const updateAllStatus = []
-        usersRef.on("value", (snapshot) => {
-            users = snapshot.val()
-            updateAllStatus.forEach(l => l())
-        })
+        if (cmid) {
+            const username = $usertext.innerText
 
-        const DEBUG = true
-
-        const submit = () => document.querySelector(".submitbtns input").click()
-        const $ques = Array.from(document.querySelectorAll(".que"))
-        const ref = database.ref("questions_v3").child(cmid)
-
-        const $total = cr("p", "Total questions answered: loading...")
-        const $navblock = document.querySelector("#mod_quiz_navblock .card-body")
-        $navblock.appendChild($total)
-        ref.on("value", (snapshot) => {
-            $total.innerText = "Total questions answered: " + Object.values(snapshot.val()).reduce((acc, el) => el.answers ? acc + 1 : acc, 0)
-        })
-
-        $ques.forEach(async ($que) => {
-            const startTime = performance.now()
-            let endTime = null
-            let loaded = false
-            let voters = []
-
-            const $total = cr("div", "loading...", "state")
-            const $info = $que.querySelector(".info")
-            const $formulation = $que.querySelector(".formulation")
-            $info.appendChild($total)
-
-            const $files = cr("details", "<summary>Files</summary>")
-
-            const replacedImages = $que.querySelector(".qtext").cloneNode(true)
-            Array.from(replacedImages.querySelectorAll("img")).map(l => {
-                const [, first, second] = l.src.match(/pluginfile\.php\/(.+?)\/.+\/(.+)/)
-                l.parentNode.replaceChild(cr("div", `image (${first}/${second})`), l)
+            const usersRef = database.ref("users")
+            usersRef.child(uid).set(username)
+            let users = null
+            const updateAllStatus = []
+            usersRef.on("value", (snapshot) => {
+                users = snapshot.val()
+                updateAllStatus.forEach(l => l())
             })
-            const question = replacedImages.innerText.replace(/(\r\n|\n|\r)/gm,"")
-            const qHash = await hashCode(question)
-            console.log({question, qHash})
-            const qRef = ref.child(qHash)
-            const dataRef = qRef.child("data")
 
-            const $status = cr("div", "", "dHash")
+            const DEBUG = true
 
-            const updateStatus = () => {
-                let id = "id: " + qHash.substr(0, 4) + "..." + qHash.substr(qHash.length - 4, 4)
-                let votersNames = Array.from(voters).map(voter => users[voter] || "Unknown").join(", ")
-                let loadedTime = "loaded in " + Math.floor((endTime - startTime) / 100) / 10 + "s!"
-                let loading = loaded ? loadedTime + "\n" + voters.length + " voters: " + votersNames : "loading"
-                $status.innerText = `${loading} | ${id}`
-            }
+            const submit = () => document.querySelector(".submitbtns input").click()
+            const $ques = Array.from(document.querySelectorAll(".que"))
+            const ref = database.ref("questions_v3").child(cmid)
 
-            updateAllStatus.push(updateStatus)
+            const $total = cr("p", "Total questions answered: loading...")
+            const $navblock = document.querySelector("#mod_quiz_navblock .card-body")
+            $navblock.appendChild($total)
+            ref.on("value", (snapshot) => {
+                $total.innerText = "Total questions answered: " + Object.values(snapshot.val()).reduce((acc, el) => el.answers ? acc + 1 : acc, 0)
+            })
 
-            if (DEBUG) {
-                $formulation.appendChild($status)
-                updateStatus()
-            }
+            $ques.forEach(async ($que) => {
+                const startTime = performance.now()
+                let endTime = null
+                let loaded = false
+                let voters = []
 
-            const answersRef = qRef.child("answers")
-            const filesRef = qRef.child("files")
-            const verifiedRef = qRef.child("verified")
+                const $total = cr("div", "loading...", "state")
+                const $info = $que.querySelector(".info")
+                const $formulation = $que.querySelector(".formulation")
+                $info.appendChild($total)
 
+                const $files = cr("details", "<summary>Files</summary>")
 
-            // const updateAllText = () => {
-            //     bigInputs.forEach(({ref, $input}) => {
-            //         ref.child(uid).set(username + ": " + $input.value)
-            //     })
-            // }
-
-            const updateAll = () => {
-                answers.forEach(({ref, $input}) => {
-                    ref.child(uid).set($input.checked)
+                const replacedImages = $que.querySelector(".qtext").cloneNode(true)
+                Array.from(replacedImages.querySelectorAll("img")).map(l => {
+                    const [, first, second] = l.src.match(/pluginfile\.php\/(.+?)\/.+\/(.+)/)
+                    l.parentNode.replaceChild(cr("div", `image (${first}/${second})`), l)
                 })
-            }
+                const question = replacedImages.innerText.replace(/(\r\n|\n|\r)/gm, "")
+                const qHash = await hashCode(question)
+                console.log({question, qHash})
+                const qRef = ref.child(qHash)
+                const dataRef = qRef.child("data")
 
-            const $attachments = $formulation.querySelector(".attachments")
-            if ($attachments) {
-                $formulation.appendChild($files)
+                const $status = cr("div", "", "dHash")
 
-                const observer = new MutationObserver(function (mutations) {
-                    Array.from($attachments.querySelectorAll(".fp-file")).forEach((file, i) => {
-                        file.click()
-                        document.querySelector(".fp-file-download").click()
-                        const $iframe = document.body.children[document.body.children.length - 1]
-                        const src = $iframe.src
-                        $iframe.parentNode.removeChild($iframe)
-                        document.querySelector(".closebutton").click()
-                        fetch(src).then(res => {
-                            return res.blob()
-                        }).then((blob) => {
-                            const task = storage.ref(`${cmid}/${qHash}/${i}`).put(blob)
-                            task.on('state_changed', () => {
-                            }, () => {
-                            }, () => {
-                                filesRef.child(uid).child(i).set(task.snapshot.ref.fullPath)
-                                task.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                                    console.log('File available at', downloadURL);
-                                });
-                            })
-                            // filesRef.child(uid).put(blob)
-                        })
+                const updateStatus = () => {
+                    let id = "id: " + qHash.substr(0, 4) + "..." + qHash.substr(qHash.length - 4, 4)
+                    let votersNames = Array.from(voters).map(voter => users[voter] || "Unknown").join(", ")
+                    let loadedTime = "loaded in " + Math.floor((endTime - startTime) / 100) / 10 + "s!"
+                    let loading = loaded ? loadedTime + "\n" + voters.length + " voters: " + votersNames : "loading"
+                    $status.innerText = `${loading} | ${id}`
+                }
+
+                updateAllStatus.push(updateStatus)
+
+                if (DEBUG) {
+                    $formulation.appendChild($status)
+                    updateStatus()
+                }
+
+                const answersRef = qRef.child("answers")
+                const filesRef = qRef.child("files")
+                const verifiedRef = qRef.child("verified")
+
+
+                // const updateAllText = () => {
+                //     bigInputs.forEach(({ref, $input}) => {
+                //         ref.child(uid).set(username + ": " + $input.value)
+                //     })
+                // }
+
+                const updateAll = () => {
+                    answers.forEach(({ref, $input}) => {
+                        ref.child(uid).set($input.checked)
                     })
-                });
+                }
 
-                observer.observe($attachments, {
-                    attributes: false,
-                    childList: true,
-                    characterData: false,
-                    subtree: true
-                });
-            }
+                const $attachments = $formulation.querySelector(".attachments")
+                if ($attachments) {
+                    $formulation.appendChild($files)
 
-            let answers = (await Promise.all(Array.from($que.querySelectorAll(".answer div[data-region=\"answer-label\"], .answer > div > label"))
-                .map(async l => {
-                    const verified = !!l.parentNode.querySelector(".fa-check")
-                    const invalid = !!l.parentNode.querySelector(".fa-remove")
-                    const $copy = l.cloneNode(true)
-                    const $answernumber = $copy.querySelector(".answernumber")
+                    const observer = new MutationObserver(function (mutations) {
+                        Array.from($attachments.querySelectorAll(".fp-file")).forEach((file, i) => {
+                            file.click()
+                            document.querySelector(".fp-file-download").click()
+                            const $iframe = document.body.children[document.body.children.length - 1]
+                            const src = $iframe.src
+                            $iframe.parentNode.removeChild($iframe)
+                            document.querySelector(".closebutton").click()
+                            fetch(src).then(res => {
+                                return res.blob()
+                            }).then((blob) => {
+                                const task = storage.ref(`${cmid}/${qHash}/${i}`).put(blob)
+                                task.on('state_changed', () => {
+                                }, () => {
+                                }, () => {
+                                    filesRef.child(uid).child(i).set(task.snapshot.ref.fullPath)
+                                    task.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                                        console.log('File available at', downloadURL);
+                                    });
+                                })
+                                // filesRef.child(uid).put(blob)
+                            })
+                        })
+                    });
 
-                    $answernumber && $answernumber.parentNode.removeChild($answernumber)
+                    observer.observe($attachments, {
+                        attributes: false,
+                        childList: true,
+                        characterData: false,
+                        subtree: true
+                    });
+                }
 
-                    const text = $copy.innerText
-                    const hash = await hashCode(text, false)
-                    const $input = l.parentNode.querySelector("input:not([type='hidden'])")
-                    if (verified) {
-                        verifiedRef.child(hash).set(true)
-                    }
-                    if (invalid) {
-                        verifiedRef.child(hash).set(false)
-                    }
+                let answers = (await Promise.all(Array.from($que.querySelectorAll(".answer div[data-region=\"answer-label\"], .answer > div > label"))
+                    .map(async l => {
+                        const verified = !!l.parentNode.querySelector(".fa-check")
+                        const invalid = !!l.parentNode.querySelector(".fa-remove")
+                        const $copy = l.cloneNode(true)
+                        const $answernumber = $copy.querySelector(".answernumber")
 
-                    if ($input) {
-                        $input.addEventListener("change", updateAll)
+                        $answernumber && $answernumber.parentNode.removeChild($answernumber)
+
+                        const text = $copy.innerText
+                        const hash = await hashCode(text, false)
+                        const $input = l.parentNode.querySelector("input:not([type='hidden'])")
+                        if (verified) {
+                            verifiedRef.child(hash).set(true)
+                        }
+                        if (invalid) {
+                            verifiedRef.child(hash).set(false)
+                        }
+
+                        if ($input) {
+                            $input.addEventListener("change", updateAll)
 
 
-                        return {
-                            hash,
-                            text,
-                            $input,
-                            ref: answersRef.child(hash),
-                            verified: (verified) => {
-                                if (verified) {
-                                    if (!l.querySelector("valid_" + hash)) {
-                                        const $icon = validIcon()
+                            return {
+                                hash,
+                                text,
+                                $input,
+                                ref: answersRef.child(hash),
+                                verified: (verified) => {
+                                    if (verified) {
+                                        if (!l.querySelector("valid_" + hash)) {
+                                            const $icon = validIcon()
+                                            $icon.id = "valid_" + hash
+                                            l.appendChild($icon)
+                                        }
+                                    } else {
+                                        const $prev = l.querySelector("valid_" + hash)
+                                        if ($prev) {
+                                            $prev.parentNode.removeChild($prev)
+                                        }
+                                        const $icon = invalidIcon()
                                         $icon.id = "valid_" + hash
                                         l.appendChild($icon)
                                     }
-                                } else {
-                                    const $prev = l.querySelector("valid_" + hash)
-                                    if ($prev) {
-                                        $prev.parentNode.removeChild($prev)
+                                },
+                                update: (voted, total, isValid) => {
+                                    const percentage = Math.floor((voted / total) * 100)
+
+                                    $input.parentElement.style.setProperty('--progress', percentage + '%');
+                                    if (isValid) {
+                                        $input.parentElement.style.setProperty("--color", "rgba(92, 184, 92, 0.2)")
+                                    } else {
+                                        $input.parentElement.style.removeProperty("--color")
                                     }
-                                    const $icon = invalidIcon()
-                                    $icon.id = "valid_" + hash
-                                    l.appendChild($icon)
                                 }
-                            },
-                            update: (voted, total, isValid) => {
-                                const percentage = Math.floor((voted / total) * 100)
-
-                                $input.parentElement.style.setProperty('--progress', percentage + '%');
-                                if (isValid) {
-                                    $input.parentElement.style.setProperty("--color", "rgba(92, 184, 92, 0.2)")
-                                } else {
-                                    $input.parentElement.style.removeProperty("--color")
-                                }
-                            }
-                        };
-                    }
-                }))).filter(Boolean)
+                            };
+                        }
+                    }))).filter(Boolean)
 
 
-            answers = [...answers, ...await Promise.all(Array.from($que.querySelectorAll("table.answer tr")).map(async l => {
-                const text = l.querySelector("td.text").innerText
-                const hash = await hashCode(text)
-                const $select = l.querySelector("select")
-                const ref = answersRef.child(hash)
-                const $options = Array.from(l.querySelectorAll("option"))
-                $options.forEach(q => {
-                    q.dataset.text = q.innerText
-                    q.appendChild(cr("i", "", "fa-check"))
-                })
-                $select.addEventListener("change", () => {
-                    ref.child(uid).set($select.options[$select.selectedIndex].dataset.text)
-                })
-                console.log($select)
-                if ($select.parentNode.querySelector(".fa-check")) {
-                    verifiedRef.child(hash).set($select.options[$select.selectedIndex].dataset.text)
-                }
-
-                return {
-                    hash,
-                    text,
-                    ref,
-                    verified: (verified) => {
-                        // TODO
-                    },
-                    update: (voted, total, isValid, answers) => {
-                        $options.forEach(q => {
-                            const text = q.dataset.text
-                            let ss = 0
-                            const total = Object.keys(answers).length
-                            Object.keys(answers).forEach(key => {
-                                const value = answers[key]
-                                if (value === text) {
-                                    ss++
-                                }
-                            })
-                            const percentage = Math.floor((ss / total) * 100)
-                            q.innerText = q.dataset.text + ` | ${isNaN(percentage) ? 0 : percentage}%`
-                        })
-
-                    }
-                }
-            }))]
-
-            //
-            const textboxes = Array.from($que.querySelectorAll(".formulation input[type='text'], .formulation div[role='textbox']"))
-            answers = [...answers, ...textboxes
-                .map(($input, i) => {
-                    let $container = $formulation
-                    if (textboxes.length > 1) {
-                        $container = cr("details")
-                        $container.appendChild(cr("summary", "q" + i))
-                        $formulation.appendChild($container)
-                    }
-
-                    if ($input.parentNode.querySelector(".fa-check")) {
-                        verifiedRef.child(i).set($input.innerHTML || $input.value)
-                    }
-
-                    const ref = answersRef.child(i)
-                    $input.addEventListener("input", () => {
-                        ref.child(uid).set($input.innerHTML || $input.value)
+                answers = [...answers, ...await Promise.all(Array.from($que.querySelectorAll("table.answer tr")).map(async l => {
+                    const text = l.querySelector("td.text").innerText
+                    const hash = await hashCode(text)
+                    const $select = l.querySelector("select")
+                    const ref = answersRef.child(hash)
+                    const $options = Array.from(l.querySelectorAll("option"))
+                    $options.forEach(q => {
+                        q.dataset.text = q.innerText
+                        q.appendChild(cr("i", "", "fa-check"))
                     })
+                    $select.addEventListener("change", () => {
+                        ref.child(uid).set($select.options[$select.selectedIndex].dataset.text)
+                    })
+                    console.log($select)
+                    if ($select.parentNode.querySelector(".fa-check")) {
+                        verifiedRef.child(hash).set($select.options[$select.selectedIndex].dataset.text)
+                    }
 
-                    // const text = $input.value
-                    // const $crowd = cr("div", "loading...", "crowd")
-                    // $input.parentNode.parentNode.parentNode.appendChild($crowd)
-                    // $input.addEventListener("change", updateAllText)
-                    //
                     return {
-                        $input,
+                        hash,
+                        text,
                         ref,
-                        hash: i,
                         verified: (verified) => {
-                            const $answers = cr("details")
-                            $answers.open = true
-                            $answers.id = "zza_" + qHash + "_" + i
-                            $answers.appendChild(cr("summary", "VERIFIED " + validIcon().outerHTML))
-                            const $text = cr("div", verified, "editor_atto_content_wrap")
-                            $text.style.overflowWrap = "break-word"
-                            $answers.appendChild($text)
-                            $container.appendChild($answers)
+                            // TODO
                         },
                         update: (voted, total, isValid, answers) => {
-                            if (answers) {
-                                Object.keys(answers).forEach((user) => {
-                                    const username = users[user]
-                                    const html = answers[user]
-                                    let $answers = document.querySelector("#" + "zz_" + qHash + "_" + i + "_" + user + " .editor_atto_content_wrap")
-                                    if (!$answers) {
-                                        if (html) {
-                                            $answers = cr("details")
-                                            $answers.open = true
-                                            $answers.id = "zz_" + qHash + "_" + i + "_" + user
-                                            $answers.appendChild(cr("summary", username))
-                                            const $text = cr("div", html, "editor_atto_content_wrap")
-                                            $text.style.overflowWrap = "break-word"
-                                            $answers.appendChild($text)
-                                            $container.appendChild($answers)
-                                        }
-                                    } else {
-                                        if (!html) {
-                                            $answers.parentNode.parentNode.removeChild($answers.parentNode)
-                                        } else {
-                                            $answers.innerHTML = html
-                                        }
+                            $options.forEach(q => {
+                                const text = q.dataset.text
+                                let ss = 0
+                                const total = Object.keys(answers).length
+                                Object.keys(answers).forEach(key => {
+                                    const value = answers[key]
+                                    if (value === text) {
+                                        ss++
                                     }
                                 })
-                            }
+                                const percentage = Math.floor((ss / total) * 100)
+                                q.innerText = q.dataset.text + ` | ${isNaN(percentage) ? 0 : percentage}%`
+                            })
 
                         }
                     }
-                })]
+                }))]
 
-            dataRef.set({
-                html: $que.innerHTML,
-                question,
-            })
+                //
+                const textboxes = Array.from($que.querySelectorAll(".formulation input[type='text'], .formulation div[role='textbox']"))
+                answers = [...answers, ...textboxes
+                    .map(($input, i) => {
+                        let $container = $formulation
+                        if (textboxes.length > 1) {
+                            $container = cr("details")
+                            $container.appendChild(cr("summary", "q" + i))
+                            $formulation.appendChild($container)
+                        }
 
-            const processFiles = (snapshot) => {
-                const value = snapshot.val()
-                if (value) {
-                    Object.keys(value).forEach(user => {
-                        const fileRefs = value[user]
-                        fileRefs.forEach((fileRef, i) => {
-                            storage.ref(fileRef).getDownloadURL().then(url => {
-                                const $a = document.querySelector("#a" + fileRef.replace(/\//g, "_"))
-                                if ($a) {
-                                    $a.href = url
-                                } else {
-                                    const $a = cr("a", users[user] + " / " + i)
-                                    $a.href = url
-                                    $a.id = "a" + fileRef.replace(/\//g, "_")
-                                    $a.target = "_blank"
-                                    $files.appendChild($a)
+                        if ($input.parentNode.querySelector(".fa-check")) {
+                            verifiedRef.child(i).set($input.innerHTML || $input.value)
+                        }
+
+                        const ref = answersRef.child(i)
+                        $input.addEventListener("input", () => {
+                            ref.child(uid).set($input.innerHTML || $input.value)
+                        })
+
+                        // const text = $input.value
+                        // const $crowd = cr("div", "loading...", "crowd")
+                        // $input.parentNode.parentNode.parentNode.appendChild($crowd)
+                        // $input.addEventListener("change", updateAllText)
+                        //
+                        return {
+                            $input,
+                            ref,
+                            hash: i,
+                            verified: (verified) => {
+                                const $answers = cr("details")
+                                $answers.open = true
+                                $answers.id = "zza_" + qHash + "_" + i
+                                $answers.appendChild(cr("summary", "VERIFIED " + validIcon().outerHTML))
+                                const $text = cr("div", verified, "editor_atto_content_wrap")
+                                $text.style.overflowWrap = "break-word"
+                                $answers.appendChild($text)
+                                $container.appendChild($answers)
+                            },
+                            update: (voted, total, isValid, answers) => {
+                                if (answers) {
+                                    Object.keys(answers).forEach((user) => {
+                                        const username = users[user]
+                                        const html = answers[user]
+                                        let $answers = document.querySelector("#" + "zz_" + qHash + "_" + i + "_" + user + " .editor_atto_content_wrap")
+                                        if (!$answers) {
+                                            if (html) {
+                                                $answers = cr("details")
+                                                $answers.open = true
+                                                $answers.id = "zz_" + qHash + "_" + i + "_" + user
+                                                $answers.appendChild(cr("summary", username))
+                                                const $text = cr("div", html, "editor_atto_content_wrap")
+                                                $text.style.overflowWrap = "break-word"
+                                                $answers.appendChild($text)
+                                                $container.appendChild($answers)
+                                            }
+                                        } else {
+                                            if (!html) {
+                                                $answers.parentNode.parentNode.removeChild($answers.parentNode)
+                                            } else {
+                                                $answers.innerHTML = html
+                                            }
+                                        }
+                                    })
                                 }
+
+                            }
+                        }
+                    })]
+
+                dataRef.set({
+                    html: $que.innerHTML,
+                    question,
+                })
+
+                const processFiles = (snapshot) => {
+                    const value = snapshot.val()
+                    if (value) {
+                        Object.keys(value).forEach(user => {
+                            const fileRefs = value[user]
+                            fileRefs.forEach((fileRef, i) => {
+                                storage.ref(fileRef).getDownloadURL().then(url => {
+                                    const $a = document.querySelector("#a" + fileRef.replace(/\//g, "_"))
+                                    if ($a) {
+                                        $a.href = url
+                                    } else {
+                                        const $a = cr("a", users[user] + " / " + i)
+                                        $a.href = url
+                                        $a.id = "a" + fileRef.replace(/\//g, "_")
+                                        $a.target = "_blank"
+                                        $files.appendChild($a)
+                                    }
+                                })
                             })
                         })
+                    }
+                }
+
+                const processVerified = (snapshot) => {
+                    const value = snapshot.val()
+                    if (!value) return
+
+                    answers.forEach(({hash, verified}) => {
+                        const k = value[hash]
+                        if (k == null) {
+                            return
+                        }
+                        // console.log("VERIFIED", hash, k)
+                        verified(k)
+                        // update(count, total, count === total, k)
                     })
                 }
-            }
 
-            const processVerified = (snapshot) => {
-                const value = snapshot.val()
-                if (!value) return
+                const process = (snapshot) => {
+                    const value = snapshot.val()
+                    $formulation.style.setProperty("--formulation-bg", "#def2f8")
 
-                answers.forEach(({hash, verified}) => {
-                    const k = value[hash]
-                    if (k == null) {
+                    loaded = true
+                    const allVoted = new Set()
+                    if (value) {
+                        Object.values(value).forEach((k) => Object.keys(k).forEach(l => allVoted.add(l)))
+                    }
+                    voters = Array.from(allVoted)
+                    if (!endTime) {
+                        endTime = performance.now()
+                    }
+
+                    updateStatus()
+
+
+                    if (!value) {
+                        $total.innerText = "Nobody has answered this question yet."
+                        answers.forEach(({update}) => {
+                            update(0, 0, false)
+                        })
+                        // bigInputs.forEach(({$crowd}) => {
+                        //     $crowd.innerText = `No answers yet.`
+                        // })
                         return
                     }
-                    // console.log("VERIFIED", hash, k)
-                    verified(k)
-                    // update(count, total, count === total, k)
-                })
-            }
+                    $total.innerText = `Loaded!`
 
-            const process = (snapshot) => {
-                const value = snapshot.val()
-                $formulation.style.setProperty("--formulation-bg", "#def2f8")
+                    const total = Object.values(value).reduce((acc, it) => acc + Object.values(it).filter(Boolean).length, 0)
 
-                loaded = true
-                const allVoted = new Set()
-                if (value) {
-                    Object.values(value).forEach((k) => Object.keys(k).forEach(l => allVoted.add(l)))
-                }
-                voters = Array.from(allVoted)
-                if (!endTime) {
-                    endTime = performance.now()
-                }
+                    answers.forEach(({hash, update}) => {
+                        const k = value[hash]
+                        if (!k) {
+                            update(0, 1, false, {})
+                            // TODO
+                            // $crowd.innerText = `Unknown answer?`
+                            // No answer found?
+                            return
+                        }
+                        const count = Object.values(k).filter(Boolean).length
 
-                updateStatus()
-
-
-                if (!value) {
-                    $total.innerText = "Nobody has answered this question yet."
-                    answers.forEach(({update}) => {
-                        update(0, 0, false)
+                        update(count, total, count === total, k)
                     })
-                    // bigInputs.forEach(({$crowd}) => {
-                    //     $crowd.innerText = `No answers yet.`
-                    // })
-                    return
                 }
-                $total.innerText = `Loaded!`
 
-                const total = Object.values(value).reduce((acc, it) => acc + Object.values(it).filter(Boolean).length, 0)
+                answersRef.on("value", process)
 
-                answers.forEach(({hash, update}) => {
-                    const k = value[hash]
-                    if (!k) {
-                        update(0, 1, false, {})
-                        // TODO
-                        // $crowd.innerText = `Unknown answer?`
-                        // No answer found?
-                        return
-                    }
-                    const count = Object.values(k).filter(Boolean).length
-
-                    update(count, total, count === total, k)
-                })
-            }
-
-            answersRef.on("value", process)
-
-            filesRef.on("value", processFiles)
-            verifiedRef.on("value", processVerified)
-        })
+                filesRef.on("value", processFiles)
+                verifiedRef.on("value", processVerified)
+            })
+        }
     }
 
-    document.onkeypress = (e) => {
-        if(e.key === 'z' && e.altKey) {
-            e.preventDefault()
-            if(localStorage.getItem('hidden') === "true") {
-                localStorage.removeItem('hidden')
-                location.reload()
-            } else {
-                alert('alt+z to show again');
-                localStorage.setItem('hidden', 'true')
-                Array.from(document.querySelectorAll("*[data-crowdvns]")).forEach(l => {
-                    l.style = "display: none;";
-                })
-                Array.from(document.querySelectorAll(".answer > div")).forEach(l => {
-                    l.style = "--progress: 0%;";
-                })
-                document.querySelector(".logo img").src = prevLogo;
-            }
+    const names = [
+        "Порно",
+        "LEVUS???",
+        "ко-ко-ко шорткат не паше",
+        "PRAVUS???",
+        "Перейти в ЛНУ",
+        "Захист від повторки",
+        "Натисність для отримання комісії",
+    ]
+    const dropdown = document.querySelector("#action-menu-1-menu");
+    dropdown.innerHTML += `<a id="suck" class="dropdown-item menu-action">
+                                <i class="icon fa fa-blind fa-fw " aria-hidden="true"></i>
+                                <span class="menu-action-text" id="actionmenuaction-6">${names[Math.floor(Math.random()*names.length)]}</span>
+                        </a>`
+    document.querySelector("#suck").onclick = () => {
+        if(localStorage.getItem('hidden') === "true") {
+            localStorage.removeItem('hidden')
+            location.reload()
+        } else {
+            alert('alt+z to show again');
+            localStorage.setItem('hidden', 'true')
+            Array.from(document.querySelectorAll("*[data-crowdvns]")).forEach(l => {
+                l.style = "display: none;";
+            })
+            Array.from(document.querySelectorAll(".answer > div")).forEach(l => {
+                l.style = "--progress: 0%;";
+            })
+            document.querySelector(".logo img").src = prevLogo;
         }
     }
 
