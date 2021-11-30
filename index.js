@@ -4,11 +4,11 @@
     // CHANGELOG
     // 27 May 2021 / 1.2.0 / Added migrations for exams
     // 2 Jun 2021 / 1.3.0 / Hmm...
-    const VERSION = "1.4.2";
+    const VERSION = "1.4.3";
     let prevLogo = document.querySelector(".logo img").src
     const addLogos = () => {
         const manifest = chrome.runtime.getManifest()
-        const $crowdLogo = cr("sub", ` ${manifest.name} v${VERSION} [press ctrl+. to hide]`, "crowd-logo")
+        const $crowdLogo = cr("sub", ` ${manifest.name} v${VERSION} [press alt+z to hide]`, "crowd-logo")
         document.querySelector(".site-name").appendChild($crowdLogo)
         const $logo = document.querySelector(".logo img")
         $logo && ($logo.src = chrome.runtime.getURL("images/preview.png"))
@@ -39,6 +39,7 @@
 
     const getQuizLinks = () => {
         return Array.from(document.querySelectorAll("img[src*=\"theme/image.php/boost/quiz/\"]")).map(l => {
+            if(!l.parentNode.href) return undefined;
             const name = l.parentNode.querySelector(".instancename")
             if(name.querySelector(".accesshide")) {
                 name.removeChild(name.querySelector(".accesshide"))
@@ -49,7 +50,7 @@
                 name: name.innerText,
                 $elem: l.parentNode
             };
-        })
+        }).filter(Boolean)
     }
 
     const hashCode = async (s, v3_hash = true) => {
@@ -528,13 +529,13 @@
     }
 
     document.onkeypress = (e) => {
-        if(e.key === '.' && e.ctrlKey) {
+        if(e.key === 'z' && e.altKey) {
             e.preventDefault()
             if(localStorage.getItem('hidden') === "true") {
                 localStorage.removeItem('hidden')
                 location.reload()
             } else {
-                alert('ctrl+. to show again');
+                alert('alt+z to show again');
                 localStorage.setItem('hidden', 'true')
                 Array.from(document.querySelectorAll("*[data-crowdvns]")).forEach(l => {
                     l.style = "display: none;";
