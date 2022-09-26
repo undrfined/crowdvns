@@ -4,13 +4,14 @@
     // CHANGELOG
     // 27 May 2021 / 1.2.0 / Added migrations for exams
     // 2 Jun 2021 / 1.3.0 / Hmm...
-    const VERSION = "1.4.4";
-    let prevLogo = document.querySelector(".logo img").src
+    // 26 Sep 2022 / 2.0.0 / support new moodle
+    const VERSION = "2.0.0";
+    const $logo = document.querySelector(".navbar-brand img.logo");
+    let prevLogo = $logo && $logo.src
     const addLogos = () => {
         const manifest = chrome.runtime.getManifest()
         const $crowdLogo = cr("sub", ` ${manifest.name} v${VERSION}`, "crowd-logo")
-        document.querySelector(".site-name").appendChild($crowdLogo)
-        const $logo = document.querySelector(".logo img")
+        document.querySelector(".navbar-brand").appendChild($crowdLogo)
         $logo && ($logo.src = chrome.runtime.getURL("images/preview.png"))
     }
 
@@ -127,12 +128,17 @@
             const cmid = new URLSearchParams(window.location.search).get('id')
 
             const $quizinfo = document.querySelector(".quizinfo")
-            const $p = cr("p", "Total questions answered: loading...");
+            const $p = cr("p", "Total questions answered: loading...", "text-left");
             $quizinfo.appendChild($p)
             const ref = database.ref("questions_v3").child(cmid)
 
             ref.on("value", (snapshot) => {
-                $p.innerText = "Total questions answered: " + Object.values(snapshot.val()).reduce((acc, el) => el.answers ? acc + 1 : acc, 0)
+                const result = snapshot.val();
+                if(result) {
+                    $p.innerText = "Total questions answered: " + Object.values(result).reduce((acc, el) => el.answers ? acc + 1 : acc, 0)
+                } else {
+                    $p.innerText = "No questions answered yet.";
+                }
             })
 
             return
@@ -531,19 +537,9 @@
         }
     }
 
-    const names = [
-        "Порно",
-        "LEVUS???",
-        "ко-ко-ко шорткат не паше",
-        "PRAVUS???",
-        "Перейти в ЛНУ",
-        "Захист від повторки",
-        "Натисність для отримання комісії",
-    ]
-    const dropdown = document.querySelector("#action-menu-1-menu");
+    const dropdown = document.querySelector("#action-menu-0-menu") || document.querySelector("#user-action-menu #carousel-item-main");
     dropdown.innerHTML += `<a id="suck" class="dropdown-item menu-action">
-                                <i class="icon fa fa-blind fa-fw " aria-hidden="true"></i>
-                                <span class="menu-action-text" id="actionmenuaction-6">${names[Math.floor(Math.random()*names.length)]}</span>
+                                <span class="menu-action-text" id="actionmenuaction-6">crowdvns</span>
                         </a>`
     document.querySelector("#suck").onclick = () => {
         if(localStorage.getItem('hidden') === "true") {
@@ -557,7 +553,7 @@
             Array.from(document.querySelectorAll(".answer > div")).forEach(l => {
                 l.style = "--progress: 0%;";
             })
-            document.querySelector(".logo img").src = prevLogo;
+            if($logo) $logo.src = prevLogo;
         }
     }
 

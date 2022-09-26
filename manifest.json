@@ -8,11 +8,13 @@
   "content_scripts": [
     {
       "css": ["styles.css"],
-      "js": ["sha256.js", "firebase.js", "loader.js"],
+      "js": ["sha256.js", "firebase.js", "index.js"],
       "matches": [
         "https://school.moodledemo.net/*",
         "https://vns.lpnu.ua/*",
-        "http://vns.lpnu.ua/*"
+        "http://vns.lpnu.ua/*",
+        "http://localhost:8888/moodle40/*",
+        "https://localhost:8888/moodle40/*"
       ]
     }
   ],
