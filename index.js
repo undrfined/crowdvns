@@ -537,7 +537,9 @@
         }
     }
 
-    const dropdown = document.querySelector("#action-menu-0-menu") || document.querySelector("#user-action-menu #carousel-item-main");
+    const dropdown = document.querySelector("#action-menu-0-menu")
+        || document.querySelector("#user-action-menu #carousel-item-main")
+        || document.querySelector("#action-menu-1-menu");
     dropdown.innerHTML += `<a id="suck" class="dropdown-item menu-action">
                                 <span class="menu-action-text" id="actionmenuaction-6">crowdvns</span>
                         </a>`

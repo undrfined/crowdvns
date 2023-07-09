@@ -1,6 +1,6 @@
 {
   "name": "crowdvns",
-  "version": "1.2",
+  "version": "2.0.1",
   "description": "Crowdsource the vns!",
   "manifest_version": 2,
   "permissions": ["https://crowdvns-default-rtdb.firebaseio.com/*", "https://*.firebaseio.com/*", "*://raw.githubusercontent.com/*"],
@@ -14,7 +14,9 @@
         "https://vns.lpnu.ua/*",
         "http://vns.lpnu.ua/*",
         "http://localhost:8888/moodle40/*",
-        "https://localhost:8888/moodle40/*"
+        "https://localhost:8888/moodle40/*",
+        "http://misa.meduniv.lviv.ua/*",
+        "https://misa.meduniv.lviv.ua/*"
       ]
     }
   ],
