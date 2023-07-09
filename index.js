@@ -147,10 +147,13 @@
         const cmid = new URLSearchParams(window.location.search).get('cmid')
 
         if (cmid) {
-            const username = $usertext.innerText
-
             const usersRef = database.ref("users")
-            usersRef.child(uid).set(username)
+
+            if($usertext) {
+                const username = $usertext.innerText
+                usersRef.child(uid).set(username)
+            }
+
             let users = null
             const updateAllStatus = []
             usersRef.on("value", (snapshot) => {

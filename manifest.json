@@ -16,7 +16,8 @@
         "http://localhost:8888/moodle40/*",
         "https://localhost:8888/moodle40/*",
         "http://misa.meduniv.lviv.ua/*",
-        "https://misa.meduniv.lviv.ua/*"
+        "https://misa.meduniv.lviv.ua/*",
+        "https://undrfin.de/*"
       ]
     }
   ],
